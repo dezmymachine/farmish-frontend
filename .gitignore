@@ -1,0 +1,17 @@
+# Env / secrets
+.env
+.env.*
+!.env.example
+
+# Node / TanStack Start
+node_modules/
+.output/
+.vinxi/
+.tanstack/
+dist/
+
+# Editors / OS
+.idea/
+.vscode/
+*.swp
+.DS_Store
