@@ -4,11 +4,14 @@ All server state flows through **TanStack Query** over the generated API
 client. No `useEffect` fetching, no raw `fetch` outside `src/api/client.ts`,
 no hand-written API types. Borrowed from cyberplug-frontend's
 `data_fetching_patterns.md`, adapted to Bearer-token auth and our envelope.
+Prefetch conventions follow the TanStack Query prefetching guide; the
+deprecated `ensureQueryData` / `prefetchQuery` / `fetchQuery` APIs are banned
+(they are removed in v6) — use `queryClient.query()` instead.
 
 ## Layers
 
 ```
-route loader (ensureQueryData — prefetch before mount)
+route loader (query() — block on critical, prefetch secondary)
   └── component
         ├── useSuspenseQuery(xyzQueryOptions())  ← page-critical, guaranteed data
         └── useQuery(xyzQueryOptions())          ← secondary / conditional / polling
@@ -43,7 +46,8 @@ key in components or feature files.
 ## Layer 3 — QueryClient (`src/api/query-client.ts`)
 
 `createQueryClient(handlers)` per session: `staleTime` 60s default,
-`gcTime: Infinity` (no re-suspend on back-nav), `refetchOnWindowFocus: false`,
+`gcTime: Infinity` (no re-suspend on back-nav; prefetched-but-unobserved
+queries are never evicted), `refetchOnWindowFocus: false`,
 no retry on 400/401/403/404/409/422, mutations `retry: false`. The cache-level
 net routes `reauth_required` → step-up dialog and `unauthorized` → sign-in
 (F2 wires the real handlers).
@@ -52,6 +56,50 @@ net routes `reauth_required` → step-up dialog and `unauthorized` → sign-in
 
 `queryOptions` factories + `useMutation` hooks. Only consumers of `request()`.
 Components never import the client.
+
+## Layer 5 — Route loaders (block vs prefetch)
+
+Every data route declares critical (blocks render) and secondary (prefetches
+without blocking) queries up front:
+
+```tsx
+export const Route = createFileRoute('/l/$slug')({
+  loader: async ({ context, params }) => {
+    // Secondary: fire-and-forget, retried by useQuery on failure.
+    void context.queryClient
+      .query(sellerQueryOptions(params.slug))
+      .catch(noop)
+    // Critical: block render; errors surface in errorComponent.
+    await context.queryClient.query({
+      ...listingQueryOptions(params.slug),
+      staleTime: 'static',
+    })
+  },
+  component: ListingDetailPage,
+})
+```
+
+Per-route table (extend as routes land):
+
+| Route | Critical (block) | Secondary (prefetch) |
+|---|---|---|
+| `/` | featured + categories | newest |
+| `/search`, `/c/$slug` | results | category tree |
+| `/l/$slug` | listing detail | seller card + reviews |
+| `/checkout` | quote | — |
+
+Known co-occurring pairs flatten their waterfall inside the critical
+`queryFn` (e.g. listing detail fires the seller query via
+`void queryClient.query(...).catch(noop)`) — acceptable bundle tradeoff only
+when the pair co-occurs nearly always.
+
+## Layer 6 — Interaction prefetch
+
+Listing cards and category tiles prefetch their detail query on
+`onMouseEnter`/`onFocus` with a 60s `staleTime` (stale-guarded, cache-deduped,
+near-zero cost). Secondaries behind a Suspense boundary use
+`usePrefetchQuery` above the boundary — never `useSuspenseQueries` to
+prefetch (it would block render).
 
 ## Farmish-only rules
 
@@ -66,13 +114,15 @@ Components never import the client.
 - **Errors:** `friendlyMessage(err)` for copy; form `details[].field` next to
   the field. Never show raw API messages.
 - **SSR split:** public routes SSR freely; authed subtrees use an `ssr: false`
-  guard (the server cannot mint user tokens).
+  guard (the server cannot mint user tokens). SSR dehydrate/hydrate wiring
+  (server `query()` → payload → client cache) is an F3 prerequisite.
 
 ## Hook selection
 
-Unrenderable without it → `useSuspenseQuery` + loader prefetch. Secondary /
-conditional (`enabled`) / polling (`refetchInterval: 20_000` for messages) →
-`useQuery`. Writing data → `useMutation` with invalidation in
+Unrenderable without it → `useSuspenseQuery` + blocking loader `query()`.
+Secondary / conditional (`enabled`) / polling (`refetchInterval: 20_000` for
+messages) → `useQuery` (+ non-blocking loader prefetch where valuable).
+Writing data → `useMutation` with invalidation in
 `onSuccess`/`onSettled`, optimistic patch only with snapshot + rollback.
 
 ## Anti-patterns
@@ -82,6 +132,7 @@ conditional (`enabled`) / polling (`refetchInterval: 20_000` for messages) →
 | `useEffect` fetch + `useState` data | `useQuery` / `useSuspenseQuery` |
 | Raw `fetch` / client import in `.tsx` | `queryOptions` factory or mutation hook |
 | Hand-written API types | Regenerate: `pnpm gen:api` (drift-checked in CI) |
+| `ensureQueryData` / `prefetchQuery` / `fetchQuery` | `queryClient.query()` (block or `void ... .catch(noop)`) |
 | Invalidate/refetch from components or effects | `onSuccess` / `onSettled` in the mutation |
 | `staleTime: 0` everywhere | Tier per data class |
 | Regenerating the idempotency key per retry | One key per attempt, held across retries |
