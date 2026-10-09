@@ -10,6 +10,10 @@ node_modules/
 .tanstack/
 dist/
 
+# Test output
+test-results/
+playwright-report/
+
 # Editors / OS
 .idea/
 .vscode/

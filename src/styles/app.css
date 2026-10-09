@@ -1,0 +1,117 @@
+@import 'tailwindcss';
+
+/*
+ * Farmish theme: Spectrum 2 structure (attention hierarchy, 4pt spacing,
+ * role-based type, pill actions, strong focus rings) over the Farmish
+ * brand palette (growth green + harvest gold). See docs/design-system.md.
+ */
+@theme {
+  --font-sans: ui-sans-system, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+
+  /* Brand green ramp — text-safe on white from 700 up, bg-safe with white text from 600 up. */
+  --color-brand-50: #f2f9f0;
+  --color-brand-100: #e0f1dc;
+  --color-brand-200: #c2e3b9;
+  --color-brand-300: #95cf88;
+  --color-brand-400: #63b457;
+  --color-brand-500: #419637;
+  --color-brand-600: #2f7a29;
+  --color-brand-700: #265f22;
+  --color-brand-800: #224e1f;
+  --color-brand-900: #1c3f1c;
+  --color-brand-950: #0d220e;
+
+  /* Harvest gold — secondary attention only (badges, highlights). */
+  --color-harvest-100: #fef3c7;
+  --color-harvest-500: #d97706;
+  --color-harvest-700: #b45309;
+
+  /* Semantic aliases (meaning, not hue). */
+  --color-accent: var(--color-brand-600);
+  --color-accent-strong: var(--color-brand-800);
+  --color-on-accent: #ffffff;
+  --color-success: var(--color-brand-600);
+  --color-success-subtle: var(--color-brand-100);
+  --color-notice: var(--color-harvest-700);
+  --color-notice-subtle: var(--color-harvest-100);
+  --color-negative: #dc2626;
+  --color-negative-subtle: #fee2e2;
+  --color-informative: #2563eb;
+  --color-informative-subtle: #dbeafe;
+
+  /* Surfaces and ink. */
+  --color-paper: #ffffff;
+  --color-wash: #f6f7f4;
+  --color-line: #e2e5de;
+  --color-ink: #14210f;
+  --color-ink-soft: #3f4a3a;
+  --color-ink-faint: #6b7466;
+
+  /* Spectrum radius set + pill for primary actions. */
+  --radius-pill: 999px;
+
+  --shadow-elevated: 0 1px 2px rgb(20 33 15 / 0.06), 0 4px 12px rgb(20 33 15 / 0.08);
+}
+
+/* Role-based type scale (t-* to avoid clashing with Tailwind text-* colors). */
+@layer components {
+  .t-display {
+    font-size: 2.5rem;
+    line-height: 1.1;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+  }
+  .t-title-lg {
+    font-size: 1.5rem;
+    line-height: 1.25;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+  .t-title {
+    font-size: 1.125rem;
+    line-height: 1.4;
+    font-weight: 700;
+  }
+  .t-body-lg {
+    font-size: 1.0625rem;
+    line-height: 1.55;
+  }
+  .t-body {
+    font-size: 0.9375rem;
+    line-height: 1.55;
+  }
+  .t-detail {
+    font-size: 0.8125rem;
+    line-height: 1.45;
+  }
+  .t-ui {
+    font-size: 0.875rem;
+    line-height: 1.4;
+    font-weight: 500;
+  }
+  .t-code {
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+    line-height: 1.45;
+  }
+}
+
+@layer base {
+  html {
+    color-scheme: light;
+  }
+
+  body {
+    @apply bg-wash text-ink antialiased;
+    font-family: var(--font-sans);
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Spectrum-grade focus: always visible, 2px brand ring with offset. Never remove. */
+  :focus-visible {
+    outline: 2px solid var(--color-brand-600);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+}
