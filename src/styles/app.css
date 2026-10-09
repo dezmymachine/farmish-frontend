@@ -6,7 +6,7 @@
  * brand palette (growth green + harvest gold). See docs/design-system.md.
  */
 @theme {
-  --font-sans: ui-sans-system, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --font-sans: 'Google Sans Flex', ui-sans-system, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 
   /* Brand green ramp — text-safe on white from 700 up, bg-safe with white text from 600 up. */
