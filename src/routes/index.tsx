@@ -1,7 +1,8 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { Sprout } from 'lucide-react'
+import { SproutIcon } from '@hugeicons/core-free-icons'
 import { HealthBadge, type HealthStatus } from '~/components/HealthBadge'
 import { Button } from '~/components/ui/button'
+import { Icon } from '~/components/ui/icon'
 import { apiBaseUrl } from '~/lib/env'
 
 export const Route = createFileRoute('/')({
@@ -38,7 +39,7 @@ function Home() {
       <section aria-label="Marketplace categories" className="mt-12 grid gap-4 sm:grid-cols-3">
         {['Crops & seeds', 'Livestock & feeds', 'Machinery & inputs'].map((title) => (
           <article key={title} className="rounded-xl border border-line bg-paper p-5 shadow-elevated">
-            <Sprout className="size-5 text-accent" aria-hidden="true" />
+            <Icon icon={SproutIcon} size={20} className="text-accent" />
             <h2 className="t-title mt-3 text-ink">{title}</h2>
             <p className="t-detail mt-1 text-ink-faint">Full browsing lands in phase F3.</p>
           </article>

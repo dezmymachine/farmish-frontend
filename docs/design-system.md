@@ -47,7 +47,7 @@ shadows.
 - Press: primary actions scale to 0.98 while pressed (`active:scale-[0.98]`).
 - Motion: 150 ms ease for state changes; nothing slower without a reason.
 - Sizes: `S / M / L / XL` on interactive components (default `M`).
-- Icons: lucide only, `aria-hidden` when decorative, `size-4` inside buttons.
+- Icons: Hugeicons only (`~/components/ui/icon` over `@hugeicons/core-free-icons`), `aria-hidden` when decorative.
 
 ## 6. Component map (shadcn → Spectrum role)
 

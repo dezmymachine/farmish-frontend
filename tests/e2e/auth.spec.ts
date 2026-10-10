@@ -15,6 +15,11 @@ async function isUnconfigured(page: Page): Promise<boolean> {
   return page.getByText(/Firebase web config is set/).isVisible()
 }
 
+/** SSR HTML answers clicks before React hydrates; wait for the marker. */
+async function waitForHydration(page: Page): Promise<void> {
+  await page.waitForSelector('html[data-hydrated="true"]')
+}
+
 test('sign-in page renders with a link to sign-up', async ({ page }) => {
   await page.goto('/sign-in')
   await expect(page.getByRole('heading', { name: 'Sign in to Farmish' })).toBeVisible()
@@ -43,6 +48,7 @@ test('sign-in shows all three methods when configured', async ({ page }) => {
 test('sign-in validates the email form inline', async ({ page }) => {
   await page.goto('/sign-in')
   test.skip(await isUnconfigured(page), 'Firebase web config not baked into this build')
+  await waitForHydration(page)
   await page.getByRole('button', { name: 'Sign in', exact: true }).click()
   await expect(page.getByText('That email address does not look right.')).toBeVisible()
 })
@@ -63,6 +69,7 @@ test.describe('emulator sign-in flow', () => {
     expect(create.ok()).toBe(true)
 
     await page.goto('/sign-in')
+    await waitForHydration(page)
     await page.getByLabel('Email', { exact: true }).fill(email)
     await page.getByLabel('Password', { exact: true }).fill(password)
     await page.getByRole('button', { name: 'Sign in', exact: true }).click()
