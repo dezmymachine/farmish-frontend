@@ -1,19 +1,13 @@
 import * as React from 'react'
 import { Link, useNavigate } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
-import {
-  Menu01Icon,
-  Search01Icon,
-  ShoppingCart01Icon,
-  SproutIcon,
-  Store01Icon,
-  UserCircle02Icon,
-} from '@hugeicons/core-free-icons'
+import { Menu01Icon, Search01Icon, ShoppingCart01Icon, UserCircle02Icon } from '@hugeicons/core-free-icons'
 import { useAuth } from '~/auth/AuthProvider'
 import { categoriesQueryOptions } from '~/api/queries/catalog'
 import { FALLBACK_CATEGORIES, categorySearchTo, textSearchTo, type CategoryParent } from '~/lib/categories'
 import { getCartCount } from '~/lib/cart'
 import { cn } from '~/lib/utils'
+import logoUrl from '~/assets/logo.png'
 import { Button } from '~/components/ui/button'
 import { Icon } from '~/components/ui/icon'
 import { Input } from '~/components/ui/input'
@@ -28,7 +22,9 @@ import {
 } from '~/components/ui/navigation-menu'
 
 /*
- * Site navbar: logo left, nav + search middle, cart + auth right.
+ * Site navbar in three sections: brand logo left, nav + search centred,
+ * cart + auth right. The header itself is transparent with no border —
+ * only the Categories dropdown and the mobile panel carry a surface.
  * - Home / Market are direct links; Categories opens a shadcn
  *   NavigationMenu on hover *and* keyboard focus (Radix behaviour).
  * - The live category tree comes from GET /v1/categories; the static
@@ -40,17 +36,22 @@ import {
 export function Navbar() {
   const [mobileOpen, setMobileOpen] = React.useState(false)
   return (
-    <header className="sticky top-0 z-40 border-b border-line bg-paper">
+    <header className="sticky top-0 z-40 bg-transparent">
       <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-x-3 gap-y-2 px-4 py-3">
         <Logo />
-        <DesktopNav />
-        <SearchBar className="hidden min-w-0 flex-1 md:flex" />
-        <div className="ml-auto flex items-center gap-2">
+        <div
+          data-testid="navbar-center"
+          className="hidden min-w-0 flex-1 items-center justify-center gap-3 lg:flex"
+        >
+          <DesktopNav />
+          <SearchBar className="w-full min-w-0 max-w-sm flex-1" />
+        </div>
+        <div className="ml-auto flex items-center gap-2 lg:ml-0">
           <CartButton />
           <AuthControl />
           <button
             type="button"
-            className="t-ui grid size-10 place-items-center rounded-lg text-ink-soft hover:bg-wash hover:text-ink md:hidden"
+            className="t-ui grid size-10 place-items-center rounded-lg text-ink-soft hover:bg-line hover:text-ink lg:hidden"
             aria-expanded={mobileOpen}
             aria-controls="mobile-nav"
             aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
@@ -61,7 +62,7 @@ export function Navbar() {
             <Icon icon={Menu01Icon} size={22} />
           </button>
         </div>
-        <SearchBar className="w-full md:hidden" />
+        <SearchBar className="w-full lg:hidden" />
       </div>
       {mobileOpen && (
         <MobileNav
@@ -77,9 +78,7 @@ export function Navbar() {
 function Logo() {
   return (
     <Link to="/" className="flex shrink-0 items-center gap-2" aria-label="Farmish home">
-      <span className="grid size-9 place-items-center rounded-pill bg-accent text-on-accent">
-        <Icon icon={SproutIcon} size={20} />
-      </span>
+      <img src={logoUrl} alt="Farmish" width={36} height={36} className="size-9 rounded-lg" />
       <span className="t-title text-ink">Farmish</span>
     </Link>
   )
@@ -100,29 +99,26 @@ function useMenuCategories(): Array<CategoryParent> {
 function DesktopNav() {
   const categories = useMenuCategories()
   return (
-    <NavigationMenu className="hidden md:flex" aria-label="Primary">
+    <NavigationMenu className="flex" aria-label="Primary">
       <NavigationMenuList>
         <NavigationMenuItem>
           <NavigationMenuLink asChild className={cn(navigationMenuTriggerStyle(), 'no-underline')}>
-            <Link to="/" activeOptions={{ exact: true }} activeProps={{ className: 'text-ink bg-wash' }}>
+            <Link to="/" activeOptions={{ exact: true }} activeProps={{ className: 'text-ink bg-line' }}>
               Home
             </Link>
           </NavigationMenuLink>
         </NavigationMenuItem>
         <NavigationMenuItem>
           <NavigationMenuLink asChild className={cn(navigationMenuTriggerStyle(), 'no-underline')}>
-            <Link to="/search" activeProps={{ className: 'text-ink bg-wash' }}>
-              <span className="inline-flex items-center gap-1.5">
-                <Icon icon={Store01Icon} size={16} />
-                Market
-              </span>
+            <Link to="/search" activeProps={{ className: 'text-ink bg-line' }}>
+              Market
             </Link>
           </NavigationMenuLink>
         </NavigationMenuItem>
         <NavigationMenuItem>
           <NavigationMenuTrigger>Categories</NavigationMenuTrigger>
           <NavigationMenuContent>
-            <div className="grid w-[min(52rem,90vw)] gap-5 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="grid w-[min(52rem,90vw)] gap-6 sm:grid-cols-2 lg:grid-cols-4">
               {categories.map((cat) => (
                 <div key={cat.slug}>
                   <NavigationMenuLink
@@ -216,8 +212,8 @@ function CartButton() {
     <Link
       to="/cart"
       aria-label={count > 0 ? `Cart, ${String(count)} items` : 'Cart, empty'}
-      className="t-ui relative grid size-10 place-items-center rounded-pill text-ink-soft transition-colors hover:bg-wash hover:text-ink"
-      activeProps={{ className: 'text-ink bg-wash' }}
+      className="t-ui relative grid size-10 place-items-center rounded-pill text-ink-soft transition-colors hover:bg-line hover:text-ink"
+      activeProps={{ className: 'text-ink bg-line' }}
     >
       <Icon icon={ShoppingCart01Icon} size={22} />
       {count > 0 && (
@@ -239,8 +235,8 @@ function AuthControl() {
       <Link
         to="/account"
         aria-label="Your account"
-        className="grid size-10 place-items-center rounded-pill text-ink-soft transition-colors hover:bg-wash hover:text-ink"
-        activeProps={{ className: 'text-ink bg-wash' }}
+        className="grid size-10 place-items-center rounded-pill text-ink-soft transition-colors hover:bg-line hover:text-ink"
+        activeProps={{ className: 'text-ink bg-line' }}
       >
         <Icon icon={UserCircle02Icon} size={24} />
       </Link>
@@ -256,7 +252,7 @@ function AuthControl() {
 function MobileNav({ onNavigate }: { onNavigate: () => void }) {
   const categories = useMenuCategories()
   return (
-    <nav id="mobile-nav" aria-label="Mobile" className="border-t border-line bg-paper md:hidden">
+    <nav id="mobile-nav" aria-label="Mobile" className="border-t border-line bg-paper lg:hidden">
       <ul className="t-ui mx-auto max-w-6xl space-y-1 px-4 py-3">
         <li>
           <Link

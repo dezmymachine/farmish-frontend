@@ -124,19 +124,25 @@ async function setupRouter() {
 }
 
 describe('Navbar', () => {
-  it('lays out logo left, nav + search middle, cart before auth on the right', async () => {
+  it('lays out logo left, nav + search centred, cart before auth on the right', async () => {
     const router = await setupRouter()
     render(<RouterProvider router={router} />)
 
     expect(screen.getByRole('link', { name: 'Farmish home' })).toBeVisible()
-    expect(screen.getByRole('link', { name: 'Home' })).toBeVisible()
-    expect(screen.getByRole('link', { name: /Market/ })).toBeVisible()
-    expect(screen.getByRole('button', { name: 'Categories' })).toBeVisible()
-    expect(screen.getAllByPlaceholderText(/Search seeds/i)[0]).toBeVisible()
+    expect(screen.getByAltText('Farmish')).toBeVisible()
+    const center = screen.getByTestId('navbar-center')
+    expect(center).toContainElement(screen.getByRole('link', { name: 'Home' }))
+    expect(center).toContainElement(screen.getByRole('link', { name: 'Market' }))
+    expect(center).toContainElement(screen.getByRole('button', { name: 'Categories' }))
+    const searchbox = screen.getAllByPlaceholderText(/Search seeds/i)[0]
+    expect(searchbox).toBeVisible()
+    expect(center).toContainElement(searchbox as HTMLElement)
     expect(screen.getByRole('link', { name: /Cart/ })).toBeVisible()
     expect(screen.getByRole('link', { name: 'Sign in' })).toBeVisible()
 
     const header = screen.getByRole('banner')
+    expect(header).toHaveClass('bg-transparent')
+    expect(header.className).not.toMatch(/bg-paper|border-b/)
     const order = ['Farmish home', 'Market', 'Cart', 'Sign in'].map((name) => header.innerHTML.indexOf(name))
     expect(order.every((pos) => pos >= 0)).toBe(true)
   })
