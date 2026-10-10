@@ -16,9 +16,13 @@ let auth: Auth | null = null
 let emulatorWired = false
 let appCheckWired = false
 
-/** True on the client when all four `VITE_FIREBASE_*` keys are set. */
+/**
+ * True when all four `VITE_FIREBASE_*` keys are set. Pure env read —
+ * identical on server and client so SSR hydrates cleanly. Firebase *init*
+ * stays client-only inside `getFirebaseAuth()`.
+ */
 export function isFirebaseConfigured(): boolean {
-  return typeof window !== 'undefined' && firebaseWebConfig() !== null
+  return firebaseWebConfig() !== null
 }
 
 /** The shared Firebase Auth instance, or null when unavailable. */

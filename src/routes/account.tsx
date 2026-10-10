@@ -24,15 +24,7 @@ type NameFields = z.infer<typeof nameSchema>
 function AccountPage() {
   return (
     <RequireAuth>
-      <React.Suspense
-        fallback={
-          <main className="mx-auto max-w-md px-4 py-12">
-            <p className="t-body text-ink-soft">Loading your account…</p>
-          </main>
-        }
-      >
-        <AccountDetail />
-      </React.Suspense>
+      <AccountDetail />
     </RequireAuth>
   )
 }

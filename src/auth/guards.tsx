@@ -35,10 +35,22 @@ export function adminRedirect(opts: {
 /** Wrap any signed-in page. Renders nothing until auth settles. */
 export function RequireAuth({ children }: { children: React.ReactNode }) {
   const { user, initializing } = useAuth()
-  if (initializing) return null
+  // One identical loading tree on the server, on first client render, and
+  // under Suspense: anything else hydrates mismatched (React #418) because
+  // the server cannot know the session.
+  if (typeof window === 'undefined' || initializing) return <AuthLoadingFallback />
   const to = signInRedirect({ initializing, userUid: user?.uid ?? null })
   if (to !== null) return <Navigate to={to} />
-  return <>{children}</>
+  return <React.Suspense fallback={<AuthLoadingFallback />}>{children}</React.Suspense>
+}
+
+/** Placeholder while the session settles. Shared so SSR and hydration match. */
+export function AuthLoadingFallback() {
+  return (
+    <main className="mx-auto max-w-md px-4 py-12">
+      <p className="t-body text-ink-soft">Loading your account…</p>
+    </main>
+  )
 }
 
 /** Wrap admin pages. Role comes from GET /v1/me — never from the client. */
