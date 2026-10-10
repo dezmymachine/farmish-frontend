@@ -1,6 +1,9 @@
 /** Central TanStack Query key factory. Never write a raw array key elsewhere. */
 
-export type QueryParams = Record<string, string | number | boolean | null | undefined | Array<string | number>>
+export type QueryParams = Record<
+  string,
+  string | number | boolean | null | undefined | Array<string | number>
+>
 
 function domain<const N extends string>(name: N) {
   const all = [name] as const

@@ -33,6 +33,8 @@ describe('friendlyMessage', () => {
     expect(friendlyMessage(new ApiError(500, 'mystery', 'x'))).toBe(
       'Something went wrong on our side. Please try again later.',
     )
-    expect(friendlyMessage(new Error('boom'))).toBe('Something went wrong on our side. Please try again later.')
+    expect(friendlyMessage(new Error('boom'))).toBe(
+      'Something went wrong on our side. Please try again later.',
+    )
   })
 })

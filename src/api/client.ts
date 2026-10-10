@@ -19,7 +19,7 @@ import { apiBaseUrl } from '~/lib/env'
 
 type TokenProvider = () => Promise<string | null>
 
-let tokenProvider: TokenProvider = async () => null
+let tokenProvider: TokenProvider = () => Promise.resolve(null)
 
 export function setTokenProvider(fn: TokenProvider): void {
   tokenProvider = fn
@@ -51,8 +51,8 @@ export function resetClient(): void {
 }
 
 interface FetchResult<T> {
-  data: T | undefined
-  error: unknown
+  data?: T | undefined
+  error?: unknown
   response: Response
 }
 

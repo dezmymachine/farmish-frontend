@@ -21,12 +21,12 @@ const server = setupServer(
 )
 
 beforeAll(() => {
-  server.listen({ onUnhandledRequest: 'error' })
+  server.listen({ onUnhandledFrame: 'error' })
 })
 afterEach(() => {
   server.resetHandlers()
   resetClient()
-  void setTokenProvider(async () => null)
+  setTokenProvider(() => Promise.resolve(null))
 })
 afterAll(() => {
   server.close()
@@ -34,13 +34,13 @@ afterAll(() => {
 
 describe('api client', () => {
   it('attaches the Bearer token from the provider', async () => {
-    setTokenProvider(async () => 'test-token')
+    setTokenProvider(() => Promise.resolve('test-token'))
     const me = await request(() => getClient().GET('/v1/me'))
     expect(me).toMatchObject({ id: 'u1' })
   })
 
   it('normalises envelope errors into ApiError', async () => {
-    setTokenProvider(async () => null)
+    setTokenProvider(() => Promise.resolve(null))
     const failure = await request(() => getClient().GET('/v1/me')).then(
       () => 'resolved',
       (err: unknown) => err,
