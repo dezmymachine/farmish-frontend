@@ -22,13 +22,16 @@ import {
 } from '~/components/ui/navigation-menu'
 
 /*
- * Site navbar in three sections: brand logo left, nav + search centred,
- * cart + auth right. The header itself is transparent with no border —
- * only the Categories dropdown and the mobile panel carry a surface.
+ * Site navbar in three sections: brand logo left, nav + search centred as
+ * one group, cart + auth right. The header matches the page background
+ * (bg-wash) and has no border, so it blends in; only the Categories dropdown
+ * and the mobile panel carry a surface of their own.
  * - Home / Market are direct links; Categories opens a shadcn
  *   NavigationMenu on hover *and* keyboard focus (Radix behaviour).
  * - The live category tree comes from GET /v1/categories; the static
  *   DOMAIN §9 fallback keeps the menu populated offline / in CI.
+ * - The current page is marked by text colour only (aria-current="page"),
+ *   never by a background.
  * - Signed-out visitors get an accent "Sign in" button; signed-in users
  *   get a profile icon button to /account. Cart sits before auth.
  */
@@ -36,17 +39,14 @@ import {
 export function Navbar() {
   const [mobileOpen, setMobileOpen] = React.useState(false)
   return (
-    <header className="sticky top-0 z-40 bg-transparent">
-      <div className="relative mx-auto flex max-w-6xl flex-wrap items-center gap-x-3 gap-y-2 px-4 py-3">
+    <header className="sticky top-0 z-40 bg-wash">
+      <div className="mx-auto grid max-w-6xl grid-cols-[auto_1fr_auto] items-center gap-x-4 gap-y-2 px-4 py-3">
         <Logo />
-        <div
-          data-testid="navbar-center"
-          className="hidden min-w-0 flex-1 items-center justify-center gap-3 lg:flex"
-        >
+        <div data-testid="navbar-center" className="hidden min-w-0 items-center justify-center gap-3 lg:flex">
           <DesktopNav />
-          <SearchBar className="w-full min-w-0 max-w-sm flex-1" />
+          <SearchBar className="w-full min-w-0 max-w-sm" />
         </div>
-        <div className="ml-auto flex items-center gap-2 lg:ml-0">
+        <div className="flex items-center gap-2 justify-self-end">
           <CartButton />
           <AuthControl />
           <button
@@ -62,7 +62,7 @@ export function Navbar() {
             <Icon icon={Menu01Icon} size={22} />
           </button>
         </div>
-        <SearchBar className="w-full lg:hidden" />
+        <SearchBar className="col-span-full w-full lg:hidden" />
       </div>
       {mobileOpen && (
         <MobileNav
@@ -75,10 +75,35 @@ export function Navbar() {
   )
 }
 
+/*
+ * The source PNG is 250x150 and its mark sits in a thin band of that canvas
+ * (opaque pixels at x 44–186, y 56–97). Showing the full canvas at a normal
+ * navbar height left the wordmark ~13px tall, so the logo is cropped to that
+ * band here. To swap in a new logo, update LOGO_BOX to its visible bounds.
+ */
+const LOGO_BOX = { x: 44, y: 56, w: 142, h: 41 }
+const LOGO_IMAGE = { w: 250, h: 150 }
+
 function Logo() {
   return (
     <Link to="/" className="flex shrink-0 items-center" aria-label="Farmish home">
-      <img src={logoUrl} alt="Farmish" width={250} height={150} className="h-12 w-auto" />
+      <span
+        className="relative block h-9.5 overflow-hidden"
+        style={{ aspectRatio: `${String(LOGO_BOX.w)} / ${String(LOGO_BOX.h)}` }}
+      >
+        <img
+          src={logoUrl}
+          alt="Farmish"
+          width={LOGO_IMAGE.w}
+          height={LOGO_IMAGE.h}
+          className="absolute max-w-none"
+          style={{
+            width: `${String((LOGO_IMAGE.w / LOGO_BOX.w) * 100)}%`,
+            left: `${String((-LOGO_BOX.x / LOGO_BOX.w) * 100)}%`,
+            top: `${String((-LOGO_BOX.y / LOGO_BOX.h) * 100)}%`,
+          }}
+        />
+      </span>
     </Link>
   )
 }
@@ -102,16 +127,14 @@ function DesktopNav() {
       <NavigationMenuList>
         <NavigationMenuItem>
           <NavigationMenuLink asChild className={cn(navigationMenuTriggerStyle(), 'no-underline')}>
-            <Link to="/" activeOptions={{ exact: true }} activeProps={{ className: 'text-ink bg-line' }}>
+            <Link to="/" activeOptions={{ exact: true }}>
               Home
             </Link>
           </NavigationMenuLink>
         </NavigationMenuItem>
         <NavigationMenuItem>
           <NavigationMenuLink asChild className={cn(navigationMenuTriggerStyle(), 'no-underline')}>
-            <Link to="/search" activeProps={{ className: 'text-ink bg-line' }}>
-              Market
-            </Link>
+            <Link to="/search">Market</Link>
           </NavigationMenuLink>
         </NavigationMenuItem>
         <NavigationMenuItem>
@@ -211,8 +234,7 @@ function CartButton() {
     <Link
       to="/cart"
       aria-label={count > 0 ? `Cart, ${String(count)} items` : 'Cart, empty'}
-      className="t-ui relative grid size-10 place-items-center rounded-pill text-ink-soft transition-colors hover:bg-line hover:text-ink"
-      activeProps={{ className: 'text-ink bg-line' }}
+      className="t-ui relative grid size-10 place-items-center rounded-pill text-ink-soft transition-colors hover:bg-line hover:text-ink aria-[current=page]:text-accent"
     >
       <Icon icon={ShoppingCart01Icon} size={22} />
       {count > 0 && (
@@ -234,8 +256,7 @@ function AuthControl() {
       <Link
         to="/account"
         aria-label="Your account"
-        className="grid size-10 place-items-center rounded-pill text-ink-soft transition-colors hover:bg-line hover:text-ink"
-        activeProps={{ className: 'text-ink bg-line' }}
+        className="grid size-10 place-items-center rounded-pill text-ink-soft transition-colors hover:bg-line hover:text-ink aria-[current=page]:text-accent"
       >
         <Icon icon={UserCircle02Icon} size={24} />
       </Link>

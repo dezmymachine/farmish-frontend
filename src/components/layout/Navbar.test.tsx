@@ -141,7 +141,7 @@ describe('Navbar', () => {
     expect(screen.getByRole('link', { name: 'Sign in' })).toBeVisible()
 
     const header = screen.getByRole('banner')
-    expect(header).toHaveClass('bg-transparent')
+    expect(header).toHaveClass('bg-wash')
     expect(header.className).not.toMatch(/bg-paper|border-b/)
     const order = ['Farmish home', 'Market', 'Cart', 'Sign in'].map((name) => header.innerHTML.indexOf(name))
     expect(order.every((pos) => pos >= 0)).toBe(true)

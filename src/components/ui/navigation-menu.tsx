@@ -46,7 +46,7 @@ NavigationMenuList.displayName = NavigationMenuPrimitive.List.displayName
 const NavigationMenuItem = NavigationMenuPrimitive.Item
 
 const navigationMenuTriggerStyle = cva(
-  't-ui group inline-flex h-10 w-max items-center justify-center gap-1 rounded-lg px-4 py-2 text-ink-soft transition-colors hover:bg-line hover:text-ink focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:bg-line data-[state=open]:bg-line data-[state=open]:text-ink',
+  't-ui group inline-flex h-10 w-max items-center justify-center gap-1 rounded-lg px-4 py-2 text-ink-soft transition-colors hover:bg-line hover:text-ink focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 aria-[current=page]:text-accent data-[state=open]:bg-line data-[state=open]:text-ink',
 )
 
 const NavigationMenuTrigger = React.forwardRef<
@@ -75,7 +75,12 @@ const NavigationMenuContent = React.forwardRef<
   <NavigationMenuPrimitive.Content
     ref={ref}
     className={cn(
-      'top-0 left-0 w-full data-[motion^=from-]:animate-in data-[motion^=to-]:animate-out data-[motion^=from-]:fade-in data-[motion^=to-]:fade-out data-[motion=from-end]:slide-in-from-right-52 data-[motion=from-start]:slide-in-from-left-52 data-[motion=to-end]:slide-out-to-right-52 data-[motion=to-start]:slide-out-to-left-52 md:absolute md:w-auto',
+      /*
+       * Padding lives here, not on the viewport: `md:absolute left-0` pins
+       * this box to the viewport's padding edge, so viewport padding would
+       * not inset the columns.
+       */
+      'top-0 left-0 w-full p-6 data-[motion^=from-]:animate-in data-[motion^=to-]:animate-out data-[motion^=from-]:fade-in data-[motion^=to-]:fade-out data-[motion=from-end]:slide-in-from-right-52 data-[motion=from-start]:slide-in-from-left-52 data-[motion=to-end]:slide-out-to-right-52 data-[motion=to-start]:slide-out-to-left-52 md:absolute',
       className,
     )}
     {...props}
@@ -98,7 +103,7 @@ const NavigationMenuViewport = React.forwardRef<
          * columns always divide the panel exactly and no horizontal
          * scrollbar can appear. Height still tracks the active content.
          */
-        'origin-top-center relative mx-auto mt-1.5 h-[var(--radix-navigation-menu-viewport-height)] max-h-[60vh] w-[min(52rem,100%)] overflow-x-clip overflow-y-auto rounded-xl border border-line bg-paper p-6 shadow-elevated data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-90',
+        'origin-top-center relative mx-auto mt-1.5 h-[var(--radix-navigation-menu-viewport-height)] max-h-[60vh] w-[min(52rem,100%)] overflow-x-clip overflow-y-auto rounded-xl border border-line bg-paper shadow-elevated data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-90',
         className,
       )}
       {...props}
