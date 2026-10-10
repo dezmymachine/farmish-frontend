@@ -18,13 +18,13 @@ async function isUnconfigured(page: Page): Promise<boolean> {
 test('sign-in page renders with a link to sign-up', async ({ page }) => {
   await page.goto('/sign-in')
   await expect(page.getByRole('heading', { name: 'Sign in to Farmish' })).toBeVisible()
-  await expect(page.getByRole('link', { name: 'Create an account' })).toBeVisible()
+  await expect(page.getByRole('main').getByRole('link', { name: 'Create an account' })).toBeVisible()
 })
 
 test('sign-up page renders with a link to sign-in', async ({ page }) => {
   await page.goto('/sign-up')
   await expect(page.getByRole('heading', { name: 'Join Farmish' })).toBeVisible()
-  await expect(page.getByRole('link', { name: 'Sign in', exact: true })).toBeVisible()
+  await expect(page.getByRole('main').getByRole('link', { name: 'Sign in', exact: true })).toBeVisible()
 })
 
 test('account redirects logged-out visitors to sign-in', async ({ page }) => {
