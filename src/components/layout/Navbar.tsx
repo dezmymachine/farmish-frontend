@@ -37,7 +37,7 @@ export function Navbar() {
   const [mobileOpen, setMobileOpen] = React.useState(false)
   return (
     <header className="sticky top-0 z-40 bg-transparent">
-      <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-x-3 gap-y-2 px-4 py-3">
+      <div className="relative mx-auto flex max-w-6xl flex-wrap items-center gap-x-3 gap-y-2 px-4 py-3">
         <Logo />
         <div
           data-testid="navbar-center"
@@ -77,9 +77,8 @@ export function Navbar() {
 
 function Logo() {
   return (
-    <Link to="/" className="flex shrink-0 items-center gap-2" aria-label="Farmish home">
-      <img src={logoUrl} alt="Farmish" width={36} height={36} className="size-9 rounded-lg" />
-      <span className="t-title text-ink">Farmish</span>
+    <Link to="/" className="flex shrink-0 items-center" aria-label="Farmish home">
+      <img src={logoUrl} alt="Farmish" width={250} height={150} className="h-12 w-auto" />
     </Link>
   )
 }
@@ -118,7 +117,7 @@ function DesktopNav() {
         <NavigationMenuItem>
           <NavigationMenuTrigger>Categories</NavigationMenuTrigger>
           <NavigationMenuContent>
-            <div className="grid w-[min(52rem,90vw)] gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="grid w-full gap-6 sm:grid-cols-2 lg:grid-cols-4">
               {categories.map((cat) => (
                 <div key={cat.slug}>
                   <NavigationMenuLink

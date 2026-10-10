@@ -15,9 +15,14 @@ const NavigationMenu = React.forwardRef<
   React.ComponentRef<typeof NavigationMenuPrimitive.Root>,
   React.ComponentPropsWithoutRef<typeof NavigationMenuPrimitive.Root>
 >(({ className, children, ...props }, ref) => (
+  /*
+   * Not `relative`: the header container is the positioning context, so the
+   * dropdown viewport centres itself across the whole navbar. The list
+   * itself stays centred in the available middle space.
+   */
   <NavigationMenuPrimitive.Root
     ref={ref}
-    className={cn('relative z-10 flex max-w-max flex-1 items-center justify-center', className)}
+    className={cn('z-10 flex w-full flex-1 items-center justify-center', className)}
     {...props}
   >
     {children}
@@ -84,11 +89,16 @@ const NavigationMenuViewport = React.forwardRef<
   React.ComponentRef<typeof NavigationMenuPrimitive.Viewport>,
   React.ComponentPropsWithoutRef<typeof NavigationMenuPrimitive.Viewport>
 >(({ className, ...props }, ref) => (
-  <div className={cn('absolute top-full left-0 flex justify-center')}>
+  <div className="absolute top-full left-1/2 w-full -translate-x-1/2">
     <NavigationMenuPrimitive.Viewport
       ref={ref}
       className={cn(
-        'origin-top-center relative mt-1.5 h-[var(--radix-navigation-menu-viewport-height)] max-h-[60vh] w-[min(42rem,90vw)] overflow-y-auto rounded-xl border border-line bg-paper p-6 shadow-elevated data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-90 md:w-[var(--radix-navigation-menu-viewport-width)]',
+        /*
+         * Fixed width (never Radix-measured): the content is w-full, so the
+         * columns always divide the panel exactly and no horizontal
+         * scrollbar can appear. Height still tracks the active content.
+         */
+        'origin-top-center relative mx-auto mt-1.5 h-[var(--radix-navigation-menu-viewport-height)] max-h-[60vh] w-[min(52rem,100%)] overflow-x-clip overflow-y-auto rounded-xl border border-line bg-paper p-6 shadow-elevated data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-90',
         className,
       )}
       {...props}
