@@ -3,6 +3,7 @@ import { HeadContent, Link, Scripts, createRootRoute } from '@tanstack/react-rou
 import { TanStackRouterDevtools } from '@tanstack/react-router-devtools'
 import * as React from 'react'
 import { Sprout } from 'lucide-react'
+import { AuthProvider, useAuth } from '~/auth/AuthProvider'
 import { DefaultCatchBoundary } from '~/components/DefaultCatchBoundary'
 import { NotFound } from '~/components/NotFound'
 import appCss from '~/styles/app.css?url'
@@ -41,35 +42,54 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <HeadContent />
       </head>
       <body>
-        <header className="border-b border-line bg-paper">
-          <div className="mx-auto flex max-w-5xl items-center gap-3 px-4 py-3">
-            <Link to="/" className="flex items-center gap-2" aria-label="Farmish home">
-              <span className="grid size-9 place-items-center rounded-pill bg-accent text-on-accent">
-                <Sprout className="size-5" aria-hidden="true" />
-              </span>
-              <span className="t-title text-ink">Farmish</span>
-            </Link>
-            <nav className="t-ui ml-auto flex items-center gap-4" aria-label="Primary">
-              <Link
-                to="/"
-                activeProps={{ className: 'font-bold' }}
-                activeOptions={{ exact: true }}
-                className="text-ink-faint hover:text-ink"
-              >
-                Home
+        <AuthProvider>
+          <header className="border-b border-line bg-paper">
+            <div className="mx-auto flex max-w-5xl items-center gap-3 px-4 py-3">
+              <Link to="/" className="flex items-center gap-2" aria-label="Farmish home">
+                <span className="grid size-9 place-items-center rounded-pill bg-accent text-on-accent">
+                  <Sprout className="size-5" aria-hidden="true" />
+                </span>
+                <span className="t-title text-ink">Farmish</span>
               </Link>
-            </nav>
-          </div>
-        </header>
-        {children}
-        <footer className="mt-16 border-t border-line">
-          <div className="t-detail mx-auto max-w-5xl px-4 py-6 text-ink-faint">
-            Farmish Ghana — the agricultural marketplace.
-          </div>
-        </footer>
+              <nav className="t-ui ml-auto flex items-center gap-4" aria-label="Primary">
+                <Link
+                  to="/"
+                  activeProps={{ className: 'font-bold' }}
+                  activeOptions={{ exact: true }}
+                  className="text-ink-faint hover:text-ink"
+                >
+                  Home
+                </Link>
+                <AuthLink />
+              </nav>
+            </div>
+          </header>
+          {children}
+          <footer className="mt-16 border-t border-line">
+            <div className="t-detail mx-auto max-w-5xl px-4 py-6 text-ink-faint">
+              Farmish Ghana — the agricultural marketplace.
+            </div>
+          </footer>
+        </AuthProvider>
         <TanStackRouterDevtools position="bottom-right" />
         <Scripts />
       </body>
     </html>
+  )
+}
+
+function AuthLink() {
+  const { user, initializing } = useAuth()
+  if (!initializing && user !== null) {
+    return (
+      <Link to="/account" activeProps={{ className: 'font-bold' }} className="text-ink-faint hover:text-ink">
+        Account
+      </Link>
+    )
+  }
+  return (
+    <Link to="/sign-in" activeProps={{ className: 'font-bold' }} className="text-ink-faint hover:text-ink">
+      Sign in
+    </Link>
   )
 }
