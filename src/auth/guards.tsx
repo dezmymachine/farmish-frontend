@@ -3,6 +3,7 @@ import { Navigate } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
 import { meQueryOptions } from '~/api/queries/me'
 import { useAuth } from './AuthProvider'
+import { hasSessionHint } from './session-hint'
 
 /*
  * Route guards. The redirect *decisions* are pure helpers (unit-tested
@@ -32,25 +33,18 @@ export function adminRedirect(opts: {
   return null
 }
 
-/** Wrap any signed-in page. Renders nothing until auth settles. */
+/** Wrap any signed-in page. Logged-out visitors redirect on first render. */
 export function RequireAuth({ children }: { children: React.ReactNode }) {
   const { user, initializing } = useAuth()
-  // One identical loading tree on the server, on first client render, and
-  // under Suspense: anything else hydrates mismatched (React #418) because
-  // the server cannot know the session.
-  if (typeof window === 'undefined' || initializing) return <AuthLoadingFallback />
-  const to = signInRedirect({ initializing, userUid: user?.uid ?? null })
+  // Null on the server and while the SDK restores a hinted session: both
+  // render identical (empty) trees, so hydration always matches. A missing
+  // hint means definitely logged out — decide synchronously, no flash.
+  if (typeof window === 'undefined') return null
+  const settled = !initializing || !hasSessionHint()
+  if (!settled) return null
+  const to = signInRedirect({ initializing: false, userUid: user?.uid ?? null })
   if (to !== null) return <Navigate to={to} />
-  return <React.Suspense fallback={<AuthLoadingFallback />}>{children}</React.Suspense>
-}
-
-/** Placeholder while the session settles. Shared so SSR and hydration match. */
-export function AuthLoadingFallback() {
-  return (
-    <main className="mx-auto max-w-md px-4 py-12">
-      <p className="t-body text-ink-soft">Loading your account…</p>
-    </main>
-  )
+  return <React.Suspense fallback={null}>{children}</React.Suspense>
 }
 
 /** Wrap admin pages. Role comes from GET /v1/me — never from the client. */

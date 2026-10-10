@@ -82,6 +82,7 @@ function AuthError({ message }: { message: string | null }) {
 
 function GoogleSection() {
   const navigate = useNavigate()
+  const { refreshUser } = useAuth()
   const [error, setError] = React.useState<string | null>(null)
   const [busy, setBusy] = React.useState(false)
 
@@ -92,13 +93,14 @@ function GoogleSection() {
     setError(null)
     try {
       await signInWithPopup(auth, new GoogleAuthProvider())
+      refreshUser()
       await navigate({ to: '/account' })
     } catch (err) {
       setError(firebaseErrorMessage((err as { code?: unknown }).code))
     } finally {
       setBusy(false)
     }
-  }, [navigate])
+  }, [navigate, refreshUser])
 
   return (
     <section aria-label="Continue with Google">
@@ -120,6 +122,7 @@ function GoogleSection() {
 
 function EmailSection() {
   const navigate = useNavigate()
+  const { refreshUser } = useAuth()
   const [error, setError] = React.useState<string | null>(null)
   const {
     register,
@@ -134,13 +137,14 @@ function EmailSection() {
       setError(null)
       try {
         await signInWithEmailAndPassword(auth, fields.email, fields.password)
+        refreshUser()
         await navigate({ to: '/account' })
       } catch (err) {
         const fb = err as { code?: unknown; message?: string }
         setError(fb.code !== undefined ? firebaseErrorMessage(fb.code) : friendlyMessage(err))
       }
     },
-    [navigate],
+    [navigate, refreshUser],
   )
 
   return (
@@ -197,6 +201,7 @@ function EmailSection() {
 
 function PhoneSection() {
   const navigate = useNavigate()
+  const { refreshUser } = useAuth()
   const [error, setError] = React.useState<string | null>(null)
   const [busy, setBusy] = React.useState(false)
   const [confirmation, setConfirmation] = React.useState<ConfirmationResult | null>(null)
@@ -248,13 +253,14 @@ function PhoneSection() {
     setError(null)
     try {
       await confirmation.confirm(code.trim())
+      refreshUser()
       await navigate({ to: '/account' })
     } catch (err) {
       setError(firebaseErrorMessage((err as { code?: unknown }).code))
     } finally {
       setBusy(false)
     }
-  }, [confirmation, code, navigate])
+  }, [confirmation, code, navigate, refreshUser])
 
   return (
     <section aria-label="Sign in with phone">

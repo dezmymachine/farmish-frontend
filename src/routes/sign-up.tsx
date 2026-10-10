@@ -66,6 +66,7 @@ function SignUpPage() {
 
 function GoogleSection() {
   const navigate = useNavigate()
+  const { refreshUser } = useAuth()
   const [error, setError] = React.useState<string | null>(null)
   const [busy, setBusy] = React.useState(false)
 
@@ -76,13 +77,14 @@ function GoogleSection() {
     setError(null)
     try {
       await signInWithPopup(auth, new GoogleAuthProvider())
+      refreshUser()
       await navigate({ to: '/account' })
     } catch (err) {
       setError(firebaseErrorMessage((err as { code?: unknown }).code))
     } finally {
       setBusy(false)
     }
-  }, [navigate])
+  }, [navigate, refreshUser])
 
   return (
     <section aria-label="Continue with Google">
@@ -108,6 +110,7 @@ function GoogleSection() {
 
 function EmailSection() {
   const navigate = useNavigate()
+  const { refreshUser } = useAuth()
   const [error, setError] = React.useState<string | null>(null)
   const {
     register,
@@ -123,12 +126,13 @@ function EmailSection() {
       try {
         const credential = await createUserWithEmailAndPassword(auth, fields.email, fields.password)
         await updateProfile(credential.user, { displayName: fields.displayName })
+        refreshUser()
         await navigate({ to: '/account' })
       } catch (err) {
         setError(firebaseErrorMessage((err as { code?: unknown }).code))
       }
     },
-    [navigate],
+    [navigate, refreshUser],
   )
 
   return (

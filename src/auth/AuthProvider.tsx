@@ -8,6 +8,7 @@ import { createQueryClient } from '~/api/query-client'
 import { qk } from '~/api/query-keys'
 import { setTokenProvider } from '~/api/client'
 import { getFirebaseAuth, isFirebaseConfigured } from './firebase'
+import { clearSessionHint, setSessionHint } from './session-hint'
 import { ReauthDialog } from './ReauthDialog'
 
 /*
@@ -31,6 +32,12 @@ interface AuthContextValue {
   isConfigured: boolean
   signOut: () => Promise<void>
   requestReauth: () => void
+  /**
+   * Sync the context from the SDK right after a sign-in resolves, before
+   * navigating: the `onIdTokenChanged` listener lags a render behind, which
+   * otherwise bounces a fresh sign-in back to `/sign-in` via the guard.
+   */
+  refreshUser: () => void
 }
 
 const AuthContext = React.createContext<AuthContextValue>({
@@ -39,6 +46,7 @@ const AuthContext = React.createContext<AuthContextValue>({
   isConfigured: false,
   signOut: () => Promise.resolve(),
   requestReauth: () => {},
+  refreshUser: () => {},
 })
 
 export function useAuth(): AuthContextValue {
@@ -76,21 +84,39 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       (next) => {
         setUser(next)
         setInitializing(false)
+        if (next === null) {
+          clearSessionHint()
+        } else {
+          setSessionHint()
+        }
         void queryClient.invalidateQueries({ queryKey: qk.me.all })
       },
       () => {
         setUser(null)
         setInitializing(false)
+        clearSessionHint()
       },
     )
     return unsubscribe
   }, [authInstance, queryClient])
+
+  const refreshUser = React.useCallback(() => {
+    const current = authInstance?.currentUser ?? null
+    setUser(current)
+    setInitializing(false)
+    if (current === null) {
+      clearSessionHint()
+    } else {
+      setSessionHint()
+    }
+  }, [authInstance])
 
   const signOut = React.useCallback(async () => {
     if (authInstance !== null) {
       await firebaseSignOut(authInstance)
     }
     setUser(null)
+    clearSessionHint()
     setTokenProvider(() => Promise.resolve(null))
     queryClient.removeQueries({ queryKey: qk.me.all })
   }, [queryClient, authInstance])
@@ -101,11 +127,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       initializing,
       isConfigured: configured,
       signOut,
+      refreshUser,
       requestReauth: () => {
         setReauthOpen(true)
       },
     }),
-    [user, initializing, configured, signOut],
+    [user, initializing, configured, signOut, refreshUser],
   )
 
   return (
